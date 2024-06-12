@@ -2,9 +2,11 @@
   (:use
     [clojure.java.io :only (file)])
   (:require
-    [clojure.set :as set])
+    [clojure.set :as set]
+    [clojure.string :as str])
   (:import
-    [java.io PushbackReader FileReader File]))
+    [java.io PushbackReader FileReader File]
+    [java.net URL]))
 
 (defn find-files-in
   "Returns a seq of all files (matching the regex) contained in the given directories."
@@ -37,7 +39,8 @@
   ([ns extensions]
    (let [relative-filenames (ns-to-filenames ns extensions)
          loader (clojure.lang.RT/baseLoader)
-         url (first (filter identity (map #(.getResource loader %) relative-filenames)))]
+         url (first (filter identity (map #(.getResource loader %) relative-filenames)))
+         url (URL. (str/replace (.toString url) "%20" " "))]
      (if (and url (= "file" (.getProtocol url)))
        (file (.getFile url))
        nil))))
